@@ -5,8 +5,6 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from ..registry import get_registry
-
 
 @dataclass
 class FactoryBase:
@@ -16,8 +14,6 @@ class FactoryBase:
     """
 
     desc_base: Optional[Path] = None
-    register: bool = True
-    registry: Optional[Any] = None
     strict: bool = True
 
     @abstractmethod
@@ -67,7 +63,6 @@ class FactoryBase:
             raise FileNotFoundError(f"Missing description files: {issues}")
 
         tools: List[Any] = []
-        registry_to_use = self.registry if self.registry is not None else (get_registry() if self.register else None)
 
         for name in selected:
             try:
@@ -75,10 +70,5 @@ class FactoryBase:
             except Exception:
                 continue
             tools.append(tool)
-            if registry_to_use is not None:
-                try:
-                    registry_to_use.register_tool(tool)
-                except Exception:
-                    pass
 
         return tools

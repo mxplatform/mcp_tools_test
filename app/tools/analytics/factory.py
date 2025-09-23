@@ -5,9 +5,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Sequence, Tuple
 
-from ..factories.base import FactoryBase
-from .base import AnalyticsTool
-from .pandas_tool import PandasAnalytics
+from app.tools.analytics.base import AnalyticsTool
+from app.tools.analytics.pandas_tool import PandasAnalytics
+from app.tools.factories.base import FactoryBase
 
 logger = logging.getLogger(__name__)
 

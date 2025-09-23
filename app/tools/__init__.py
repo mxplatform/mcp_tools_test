@@ -1,27 +1,25 @@
-from typing import Any, Callable, Optional
+from typing import Any, Callable, List, Optional
+
+from langchain_mcp_adapters.tools import to_fastmcp
 
 from .analytics.factory import AnalyticsToolFactory
-from .decorators import tool, use_analytics_tools, use_group, use_sql_tools, use_tools
-from .groups import setup_tool_groups
-from .protocols import AsyncBaseTool, AsyncTool, BaseTool, Tool
-from .registry import get_registry
+from .protocols import AsyncBaseTool
 from .sql.config import CONFIG_MAP
 from .sql.factory import SQLToolFactory
 
 
-def initialize_tools(db: Optional[Any], llm: Any) -> None:
+def initialize_tools(db: Optional[Any], llm: Any) -> List[AsyncBaseTool]:
     """Initialize and register all tools used by the application.
 
     Args:
         db: Either a SQLDatabase instance or a callable that returns one (db provider).
         llm: Language-model or client object passed to analytics tool factories.
     """
-    _registry: Any = get_registry()
 
     if db is None:
         db_provider: Optional[Callable[[], Any]] = None
     elif callable(db):
-        db_provider = db  # already a provider
+        db_provider = db
     else:
 
         def _provider() -> Any:
@@ -29,30 +27,19 @@ def initialize_tools(db: Optional[Any], llm: Any) -> None:
 
         db_provider = _provider
 
-    sql_factory = SQLToolFactory(db=db_provider, register=False)
+    sql_factory = SQLToolFactory(db=db_provider)
     sql_tools = sql_factory.create_tools(names=list(CONFIG_MAP.keys()))
-    for tool_item in sql_tools:
-        _registry.register_tool(tool_item)
 
-    analytics_factory = AnalyticsToolFactory(llm=llm, register=False)
+    analytics_factory = AnalyticsToolFactory(llm=llm)
     analytics_tools = analytics_factory.create_tools()
-    for tool_item in analytics_tools:
-        _registry.register_tool(tool_item)
 
-    setup_tool_groups()
+    tools = sql_tools + analytics_tools
 
+    mcp_tools = []
+    for tool in tools:
+        try:
+            mcp_tools.append(to_fastmcp(tool.get_langchain_tool()))
+        except Exception as e:
+            print(f"Failed to adapt tool {tool.name}: {e}")
 
-__all__ = [
-    "get_registry",
-    "use_tools",
-    "use_group",
-    "tool",
-    "use_sql_tools",
-    "use_analytics_tools",
-    "setup_tool_groups",
-    "initialize_tools",
-    "Tool",
-    "AsyncTool",
-    "BaseTool",
-    "AsyncBaseTool",
-]
+    return mcp_tools

@@ -8,7 +8,7 @@ from langchain_community.utilities import SQLDatabase
 from pydantic import BaseModel
 from sqlalchemy import text
 
-from ..protocols import AsyncBaseTool
+from app.tools.protocols import AsyncBaseTool
 
 
 class SQLTool(AsyncBaseTool):

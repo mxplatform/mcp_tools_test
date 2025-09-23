@@ -5,7 +5,7 @@ from typing import Any, Callable, Optional, Type
 from langchain.tools import StructuredTool
 from pydantic import BaseModel
 
-from ..protocols import AsyncBaseTool
+from app.tools.protocols import AsyncBaseTool
 
 
 class AnalyticsTool(AsyncBaseTool):

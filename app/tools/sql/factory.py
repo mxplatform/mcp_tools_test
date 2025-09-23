@@ -5,11 +5,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-from ..factories.base import FactoryBase
-from ..registry import get_registry
-from ..schemas import CampaignLookupParams, CampaignRecentParams, KPIQueryArgs
-from .base import SQLTool
-from .config import CONFIG_MAP
+from app.tools.factories.base import FactoryBase
+from app.tools.schemas import CampaignLookupParams, CampaignRecentParams, KPIQueryArgs
+from app.tools.sql.base import SQLTool
+from app.tools.sql.config import CONFIG_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +94,6 @@ class SQLToolFactory(FactoryBase):
         }
         schema_map = schema_map or default_schema_map
 
-        registry_to_use = self.registry if self.registry is not None else (get_registry() if self.register else None)
         discovered: List[SQLTool] = []
 
         for sql_path in sql_base.glob("*.sql"):
@@ -121,11 +119,5 @@ class SQLToolFactory(FactoryBase):
                 output_schema=output_schema,
             )
             discovered.append(tool)
-
-            if registry_to_use is not None:
-                try:
-                    registry_to_use.register_tool(tool)
-                except Exception:
-                    logger.exception("Failed to register discovered tool %s", tool_name)
 
         return discovered

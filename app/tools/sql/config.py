@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from ..schemas import CampaignLookupParams, CampaignRecentParams, KPIQueryArgs
+from app.tools.schemas import CampaignLookupParams, CampaignRecentParams, KPIQueryArgs
 
 
 @dataclass(frozen=True)
