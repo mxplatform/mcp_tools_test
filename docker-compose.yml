@@ -1,5 +1,4 @@
 
-version: '3.12'
 services:
   mcp_server:
     build: .

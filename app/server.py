@@ -18,14 +18,15 @@ from __future__ import annotations
 
 import logging
 
-from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
-from .tools.clickhouse import build_clickhouse_uri
-from langchain_community.utilities import SQLDatabase
 from langchain_aws import ChatBedrockConverse
-from .tools import initialize_tools
+from langchain_community.utilities import SQLDatabase
+from mcp.server.fastmcp import FastMCP
 
-load_dotenv('.env')
+from .tools import initialize_tools
+from .tools.clickhouse import build_clickhouse_uri
+
+load_dotenv(".env")
 
 
 LOG = logging.getLogger(__name__)
@@ -43,13 +44,13 @@ def run_server(host: str = "0.0.0.0", port: int = 8080) -> None:
 
     LOG.info("Creating database and LLM instances")
     db = SQLDatabase.from_uri(build_clickhouse_uri())
-    llm = ChatBedrockConverse(
-        model_id="us.anthropic.claude-3-5-haiku-20241022-v1:0", 
-        region_name="us-east-1"
-    )
+    llm = ChatBedrockConverse(model_id="us.anthropic.claude-3-5-haiku-20241022-v1:0", region_name="us-east-1")
 
     LOG.info("Initializing tools")
-    tools = initialize_tools(db=None, llm=None)
+    # Provide the created DB and LLM instances so SQL and analytics tools
+    # are initialized with the correct dependencies. Enable strict_check so
+    # startup validates tool wiring.
+    tools = initialize_tools(db=db, llm=llm)
 
     LOG.info("Starting MCP server on %s:%d", host, port)
     mcp = FastMCP(host=host, port=port, tools=tools)
@@ -65,6 +66,6 @@ def main() -> None:
     except KeyboardInterrupt:
         LOG.info("Server stopped by KeyboardInterrupt")
 
-if __name__ == "__main__":
-	main()
 
+if __name__ == "__main__":
+    main()
