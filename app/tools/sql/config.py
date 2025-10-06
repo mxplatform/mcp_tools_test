@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from ..schemas import CampaignLookupParams, CampaignRecentParams, KPIQueryArgs
+from ..schemas import AggregateKPIQueryArgs, CampaignLookupParams, CampaignRecentParams, KPIQueryArgs
 
 
 @dataclass(frozen=True)
@@ -15,9 +15,9 @@ CAMPAIGN_TOOL_CONFIGS: List[SQLToolConfig] = [
     SQLToolConfig("get_recent_campaigns", CampaignRecentParams, None),
     SQLToolConfig("lookup_campaigns", CampaignLookupParams, None),
     SQLToolConfig(
-        "get_campaign_metrics",
-        KPIQueryArgs,
-        [
+        name="get_campaign_metrics",
+        args_schema=KPIQueryArgs,
+        output_schema=[
             {"column": "event", "type": "string"},
             {"column": "campaign_id", "type": "Int64"},
             {"column": "anyLast(campaign_name)", "type": "string"},
@@ -49,6 +49,36 @@ CAMPAIGN_TOOL_CONFIGS: List[SQLToolConfig] = [
             {"column": "unique_click_rate", "type": "float64"},
             {"column": "bounce_rate", "type": "float64"},
             {"column": "projected_open_rate", "type": "float64"},
+        ],
+    ),
+    SQLToolConfig(
+        name="get_aggregate_campaign_metrics",
+        args_schema=AggregateKPIQueryArgs,
+        output_schema=[
+            {"column": "human_clicks", "type": "Int64"},
+            {"column": "bot_clicks", "type": "Int64"},
+            {"column": "unique_clicks", "type": "Int64"},
+            {"column": "unique_bot_clicks", "type": "Int64"},
+            {"column": "unique_human_clicks", "type": "Int64"},
+            {"column": "sent", "type": "Int64"},
+            {"column": "soft_bounces", "type": "Int64"},
+            {"column": "hard_bounces", "type": "Int64"},
+            {"column": "total_bounces", "type": "Int64"},
+            {"column": "unsubscribe", "type": "Int64"},
+            {"column": "complaints", "type": "Int64"},
+            {"column": "human_opens", "type": "Int64"},
+            {"column": "bot_opens", "type": "Int64"},
+            {"column": "unique_opens", "type": "Int64"},
+            {"column": "unique_bot_opens", "type": "Int64"},
+            {"column": "unique_human_opens", "type": "Int64"},
+            {"column": "human_readers", "type": "Int64"},
+            {"column": "bot_readers", "type": "Int64"},
+            {"column": "messages_delivered", "type": "Int64"},
+            {"column": "bounce_rate", "type": "float64"},
+            {"column": "projected_open_denominator", "type": "float64"},
+            {"column": "projected_unique_open_rate", "type": "float64"},
+            {"column": "unique_human_click_rate", "type": "float64"},
+            {"column": "opt_out_rate", "type": "float64"},
         ],
     ),
 ]

@@ -17,7 +17,7 @@ class SQLToolFactory:
     def __init__(self, db: SQLDatabase):
         self.db = db
         self.sql_dir = Path(__file__).parent / "queries"
-        self.desc_dir = Path(__file__).parent.parent / "descriptions"
+        self.desc_dir = Path(__file__).parent / "descriptions"
 
     def create_tool(self, name: str) -> SQLTool:
         """Create a single SQL tool."""

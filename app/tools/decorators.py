@@ -7,8 +7,8 @@ module keeps the registry implementation focused and avoids clutter.
 """
 from typing import Callable, Type, TypeVar
 
-from app.tools.interfaces import Tool
-from app.tools.registry import get_registry
+from .interfaces import Tool
+from .registry import get_registry
 
 T = TypeVar("T")
 
