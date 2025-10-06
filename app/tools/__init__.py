@@ -1,5 +1,8 @@
+from typing import List
+
 from langchain_aws.chat_models import ChatBedrockConverse
 from langchain_community.utilities import SQLDatabase
+from langchain_mcp_adapters.tools import to_fastmcp
 
 from .analytics import AnalyticsTool
 from .decorators import tool, use_analytics_tools, use_group, use_sql_tools, use_tools
@@ -9,26 +12,27 @@ from .registry import get_registry
 from .sql import SQLTool, SQLToolFactory
 
 
-def initialize_tools(db: SQLDatabase, llm: ChatBedrockConverse) -> None:
+def initialize_tools(db: SQLDatabase, llm: ChatBedrockConverse) -> List[Tool]:
     """Initialize and register all tools.
 
     Simplified - no provider pattern, no complex abstractions.
     """
-    registry = get_registry()
-
     # Create SQL tools
     sql_factory = SQLToolFactory(db=db)
     sql_tools = sql_factory.create_all_tools()
 
-    for sql_tool in sql_tools:
-        registry.register_tool(sql_tool)
-
     # Create analytics tool directly
     analytics_tool = AnalyticsTool.create_tool(llm=llm)
-    registry.register_tool(analytics_tool)
+    tools = sql_tools + [analytics_tool]
 
-    # Setup tool groups
-    setup_tool_groups()
+    mcp_tools = []
+    for _tool in tools:
+        try:
+            mcp_tools.append(to_fastmcp(_tool.get_langchain_tool()))
+        except Exception as e:
+            print(f"Failed to adapt tool {_tool.name}: {e}")
+
+    return mcp_tools
 
 
 __all__ = [
